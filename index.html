@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi primer mapa leaftlet</title>
+
+    <!--Leaflet-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+
+    <!--Control Capas-->
+    <link rel="stylesheet" href="/lib/css/styledLayerControl.css" />
+    <script src="/lib/src/styledLayerControl.js"></script>
+
+    <script type="text/javascript" src="/archivos/paises_mundo.js"></script>
+    <script type="text/javascript" src="/archivos/hidrografia.js"></script>
+    <script type="text/javascript" src="/archivos/ciudades.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="map" style="height: 740px;">
+        <script>
+            var OSM = new L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution:
+                        '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>' +
+                        "contributors",
+                    maxZoom: 19,
+                }
+            );
+            
+            var Satellite = L.tileLayer(
+                "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+                    attribution: "Map data &copy; Google",
+                    maxZoom: 19,
+                }
+            );
+
+            var mapaBase = [{
+                groupName: "Mapa Base OSM",
+                layers: {
+                    "<img src= 'https://cdn-icons-png.flaticon.com/512/854/854929.png' height=15px, width=15px /> OSM": OSM,
+                    "<img src = 'https://cdn-icons-png.flaticon.com/512/3301/3301722.png' width = 15px height =15px /> Satelite": Satellite,
+                },
+                },
+            ];
+
+            function getColorPaises(d) {
+                return d == 'South America' ? "#E8FF00" :
+                d == "North America" ? "#33FFFF" :
+                d == "Oceania" ? "#AA00FF" :
+                d == "Africa" ? "#00FF1F" :
+                d == "Europe" ? "#FFAA00 " :
+                d == "Asia" ? "#FF0000":
+                "#000000";
+            };
+
+            function getColorCiudades(d) {
+                return d == 'S' ? "#E8FF00" :
+                "#00FF1F";
+            };
+                
+            function estilo_paises(feature) {
+                return {
+                    fillColor: getColorPaises(feature.properties.continent),
+                    weight: 2,
+                    opacity: 1,
+                    color: "white",
+                    dashArray: "3",
+                    fillOpacity: 0.7,
+                };
+            }
+
+            function estilo_ciudades(feature) {
+                return {
+                    fillColor: getColorCiudades(feature.properties.CAPITAL),
+                    weight: 2,
+                    opacity: 1,
+                    color: "white",
+                    dashArray: "3",
+                    fillOpacity: 0.7,
+                };
+            }
+            var paises = L.geoJSON(datos_paises,{style: estilo_paises});
+            var ciudad = L.geoJSON(datos_ciudades, {
+                pointToLayer: function(feature, latlng){
+                    return L.circleMarker(latlng, estilo_ciudades(feature));
+                }
+            });
+            var hidrografias = L.geoJSON(datos_hidrografia);
+            
+            var overlays = [{
+                groupName: "Capas",
+                layers: {
+                    "<img src = 'https://cdn-icons-png.flaticon.com/512/814/814513.png' height=15px, width=15px/> Países": paises,
+                    "<img src = 'https://cdn-icons-png.flaticon.com/512/814/814513.png' height=15px, width=15px/> Ciudades": ciudad,
+                    "<img src = 'https://cdn-icons-png.flaticon.com/512/814/814513.png' height=15px, width=15px/> Hidrografía": hidrografias,
+                    },
+                },
+            ];
+
+            
+            //Añadir mapas
+            var map = L.map("map", {
+                center: [1.6180968460166651, -75.60512313749908],
+                zoom: 14,
+                layers: [OSM],
+            });
+            
+            //Título
+            var title = L.control();
+            title.onAdd = function (map) {
+                var div = L.DomUtil.create("div", "info");
+                div.innerHTML = "<img src='https://w7.pngwing.com/pngs/32/64/png-transparent-to-do-list-notebook-computer-icons-action-item-task-android-to-do-list-icon-miscellaneous-angle-text-thumbnail.png'> <h2>EJERCICIO EN CLASE 25/04</h2>";
+                return div;
+            };
+
+            title.addTo(map);
+            
+            L.Control.styledLayerControl(mapaBase, overlays, options).addTo(map);
+
+            var options = {
+                container_width: "300px",
+                group_maxHeight: "80px",
+                exclusive: false,
+            };
+
+            L.control.scale({ position: "bottomleft", imperial: true }).addTo(map);
+        </script>
+    </div>
+</body>
+</html> 
